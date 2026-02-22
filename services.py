@@ -92,7 +92,7 @@ def submit_order(token, order_details):
         "currency": "KES",
         "amount": order_details["amount"],
         "description": "Payment for FarPay Order",
-        "callback_url": "https://unopined-lorelei-unglacial.ngrok-free.dev/api/v1/payments/callback",
+        "callback_url": os.getenv("NGROK_URL"),
         "notification_id": os.getenv("PESAPAL_IPN_ID"),
         "billing_address": {
             "email_address": order_details["email"],

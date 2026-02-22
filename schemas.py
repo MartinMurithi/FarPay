@@ -24,9 +24,15 @@ class TransactionRecord(BaseModel):
     id: int
     amount: float
     phone: str
-    reference: str
-    status: str
+    transaction_ref: str
+    transaction_status: str
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        from_attributes = True  # This is mandatory for DB-to-JSON conversion
+
+
+class PesapalIPN(BaseModel):
+    OrderTrackingId: str
+    OrderMerchantReference: str
+    OrderNotificationType: str

@@ -1,5 +1,6 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
 from database import Base
 
 
@@ -14,11 +15,13 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     # ID for each row
-    id = Column(Integer, primary_key=True, index=True)
-    amount = Column(Float, nullable=False)
-    phone = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
+    phone: Mapped[str] = mapped_column(String, nullable=False)
     # Internal id to track payment status with Payment service
-    transaction_ref = Column(String, unique=True, index=True, nullable=False)
-    transaction_status = Column(String, default="PENDING")
+    transaction_ref: Mapped[str] = mapped_column(String, unique=True, index=True)
+    transaction_status: Mapped[str] = mapped_column(String, default="PENDING")
     # Audit trail: When was this transaction first created?
-    created_at = Column(DateTime, default=datetime.datetime.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now
+    )

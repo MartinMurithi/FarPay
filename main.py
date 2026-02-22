@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 import time
@@ -50,7 +50,7 @@ def initiate_payment(payload: schemas.PaymentCreate, db: Session = Depends(get_d
     return {
         "reference": transaction_ref,
         "redirect_url": pesapal_url,
-        "status": new_transaction.status,  # Now this matches 'PENDING'
+        "status": new_transaction.transaction_status,  # Now this matches 'PENDING'
     }
 
 
@@ -60,3 +60,62 @@ def mock_bank_transfer():
 
     time.sleep(3)  # Simulate network lag
     return {"message": "Funds verified by central bank", "code": 200}
+
+
+@app.get("/api/v1/payments/callback")
+def pesapal_callback(
+    OrderTrackingId: str, OrderMerchantReference: str, db: Session = Depends(get_db)
+):
+    """
+    This is the IPN endpoint Pesapal calls after a user pays.
+    """
+    # Find the transaction in our DB
+    transaction = (
+        db.query(models.Transaction)
+        .filter(models.Transaction.transaction_ref == OrderMerchantReference)
+        .first()
+    )
+
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    # Update the status
+    # In a real app, we'd verify with Pesapal API first, but for this demo:
+    transaction.transaction_status = "COMPLETED"
+
+    db.commit()
+
+    return {
+        "status": "OK",
+        "message": f"Transaction {OrderMerchantReference} updated to COMPLETED",
+    }
+
+
+@app.get("/api/v1/payments/history", response_model=list[schemas.TransactionRecord])
+def get_all_transactions(db: Session = Depends(get_db)):
+    """
+    Returns a list of all payments in the database.
+    This will be used by the Android app's 'History' screen.
+    """
+    transactions = db.query(models.Transaction).all()
+    return transactions
+
+from services import get_pesapal_token, register_ipn
+
+
+@app.get("/api/v1/test-auth")
+def test_pesapal_auth():
+    token = get_pesapal_token()
+    if token:
+        return {"status": "Success", "token_preview": f"{token[:15]}..."}
+    return {"status": "Failed", "message": "Check your console for errors"}
+
+
+@app.get("/api/v1/register-ipn")
+def setup_ipn(ngrok_url: str):
+    token = get_pesapal_token()
+    if not token:
+        return {"error": "Could not get token"}
+
+    result = register_ipn(token, ngrok_url)
+    return result

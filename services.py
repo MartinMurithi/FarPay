@@ -73,3 +73,57 @@ def register_ipn(token, ngrok_url):
     except Exception as e:
         print(f"IPN Registration Error: {e}")
         return None
+
+
+def submit_order(token, order_details):
+    """
+    Submits an order to Pesapal and returns the payment URL.
+    """
+    url = "https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest"
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+
+    # Structure required by Pesapal V3
+    payload = {
+        "id": order_details["merchant_reference"],  # Your unique internal ID
+        "currency": "KES",
+        "amount": order_details["amount"],
+        "description": "Payment for FarPay Order",
+        "callback_url": os.getenv("NGROK_URL"),
+        "notification_id": os.getenv("PESAPAL_IPN_ID"),
+        "billing_address": {
+            "email_address": order_details["email"],
+            "first_name": order_details["first_name"],
+            "last_name": order_details["last_name"],
+            "phone_number": order_details["phone"],
+        },
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        return response.json()
+    except Exception as e:
+        print(f"Submit Order Error: {e}")
+        return None
+
+
+def get_transaction_status(token, tracking_id):
+    """
+    Queries Pesapal to see if the payment was successful.
+    """
+    url = f"https://cybqa.pesapal.com/pesapalv3/api/Transactions/GetTransactionStatus?orderTrackingId={tracking_id}"
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+
+    try:
+        response = requests.get(url, headers=headers)
+        return response.json()
+    except Exception as e:
+        print(f"Status Check Error: {e}")
+        return None

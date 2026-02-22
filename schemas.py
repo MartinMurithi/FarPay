@@ -5,6 +5,9 @@ from typing import Optional
 
 # Input Schema: What the android app will the to the server
 class PaymentCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
     amount: float = Field(..., gt=0)
     phone: str
 

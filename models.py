@@ -14,7 +14,6 @@ class Transaction(Base):
 
     __tablename__ = "transactions"
 
-    # ID for each row
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)

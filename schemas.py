@@ -2,8 +2,6 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
-
-# Input Schema: What the android app will the to the server
 class PaymentCreate(BaseModel):
     first_name: str
     last_name: str
@@ -12,7 +10,6 @@ class PaymentCreate(BaseModel):
     phone: str
 
 
-# Output Schema: What the server sends back to the app
 class PaymentResponse(BaseModel):
     reference: str
     redirect_url: str
@@ -22,7 +19,6 @@ class PaymentResponse(BaseModel):
         from_attributes = True
 
 
-# History Schema: For viewing past transactions
 class TransactionRecord(BaseModel):
     id: int
     amount: float
@@ -32,7 +28,7 @@ class TransactionRecord(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True  # This is mandatory for DB-to-JSON conversion
+        from_attributes = True 
 
 
 class PesapalIPN(BaseModel):

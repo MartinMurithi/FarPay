@@ -69,7 +69,7 @@ def register_ipn(token, ngrok_url):
 
     try:
         response = requests.post(url, json=payload, headers=headers)
-        return response.json()  # This contains your IPN_ID
+        return response.json()  # This contains IPN_ID
     except Exception as e:
         print(f"IPN Registration Error: {e}")
         return None
@@ -88,7 +88,7 @@ def submit_order(token, order_details):
 
     # Structure required by Pesapal V3
     payload = {
-        "id": order_details["merchant_reference"],  # Your unique internal ID
+        "id": order_details["merchant_reference"],
         "currency": "KES",
         "amount": order_details["amount"],
         "description": "Payment for FarPay Order",

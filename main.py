@@ -13,6 +13,10 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="FarPay PaymentApi")
 
+print("========================================")
+print("   FARSIGHT DEMO: WAITING FOR REQUESTS  ")
+print("========================================")
+
 
 @app.get("/")
 def health_check():
@@ -45,8 +49,6 @@ def pesapal_callback(
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
-    # Update the status
-    # In a real app, we'd verify with Pesapal API first, but for this demo:
     transaction.transaction_status = "COMPLETED"
 
     db.commit()
@@ -100,10 +102,9 @@ def initiate_payment(payload: schemas.PaymentCreate, db: Session = Depends(get_d
     2. Calls Pesapal V3 to get a real payment link.
     3. Updates the DB with the Pesapal Tracking ID.
     """
-    # Step 1: Create a unique reference for YOUR system
+
     merchant_ref = str(uuid.uuid4())[:12]
 
-    # Step 2: Save the "Pending" transaction to your DB
     new_transaction = models.Transaction(
         amount=payload.amount,
         phone=payload.phone,
@@ -114,7 +115,6 @@ def initiate_payment(payload: schemas.PaymentCreate, db: Session = Depends(get_d
     db.commit()
     db.refresh(new_transaction)
 
-    # Step 3: Get the Token and call Pesapal
     token = get_pesapal_token()
 
     order_data = {
@@ -129,10 +129,9 @@ def initiate_payment(payload: schemas.PaymentCreate, db: Session = Depends(get_d
     result = submit_order(token, order_data)
 
     if result and result.get("status") == "200":
-        # Step 4: Success! We get a real redirect URL and Tracking ID
+
         pesapal_tracking_id = result.get("order_tracking_id")
 
-        # Optional: Save the Pesapal tracking_id to your DB record
         new_transaction.pesapal_tracking_id = pesapal_tracking_id
         db.commit()
 
@@ -142,7 +141,6 @@ def initiate_payment(payload: schemas.PaymentCreate, db: Session = Depends(get_d
             "status": "PENDING",
         }
 
-    # Step 5: If Pesapal fails, mark the DB record as FAILED
     new_transaction.transaction_status = "FAILED"
     db.commit()
     raise HTTPException(status_code=500, detail="Pesapal could not process the request")
@@ -181,7 +179,7 @@ def payment_callback(
 
 @app.get("/api/v1/payments/check-status/{merchant_ref}")
 def check_my_payment(merchant_ref: str, db: Session = Depends(get_db)):
-    # 1. Find it in your DB
+
     transaction = (
         db.query(models.Transaction)
         .filter(models.Transaction.transaction_ref == merchant_ref)

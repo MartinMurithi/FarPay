@@ -26,34 +26,3 @@ To ensure sensitive card data never touches our infrastructure, the following me
 ### B. Transaction Resilience
 * **Status Polling:** The app implements a background polling mechanism to check the backend status, ensuring the UI stays synchronized with the database regardless of callback delays.
 
-### C. Document Generation
-* Successful transactions trigger a PDF receipt generator using the `PdfDocument` API, providing users with immediate, downloadable proof of payment.
-
-## 4. Database Schema
-The PostgreSQL database utilizes a `transactions` table with the following critical fields:
-* `transaction_id`: Primary Key (UUID)
-* `pesapal_tracking_id`: Gateway reference for reconciliation.
-* `amount`: Decimal (Fixed point for precision).
-* `status`: (PENDING, SUCCESS, FAILED).
-* `idempotency_key`: Unique constraint to prevent duplicate processing.
-* `created_at`: Timestamp for audit logs.
-
-## 5. Security Protocols
-* **Environment Variables:** No API keys or Database credentials are hardcoded. All secrets are managed via `.env` files.
-* **Signature Verification:** The backend is designed to verify the signature of all incoming IPNs to prevent Request Spoofing.
-* **SSL/TLS:** Communication between the mobile client and the API is handled over HTTPS (tunneled via Ngrok).
-
-## 6. Setup & Installation
-
-### Backend (Python/FastAPI)
-1. Navigate to `/backend`.
-2. Create virtual environment: `python -m venv venv` and activate it.
-3. Install dependencies: `pip install -r requirements.txt`.
-4. Configure `.env` with PostgreSQL credentials and Pesapal Sandbox keys.
-5. Run server: `uvicorn main:app --reload`.
-6. Start Ngrok: `ngrok http 8000` (Update Pesapal Dashboard with the Ngrok URL).
-
-### Mobile (Android/Java)
-1. Open the project in Android Studio.
-2. Update the `BASE_URL` in the Retrofit client with your active Ngrok address.
-3. Sync Gradle and run the app.

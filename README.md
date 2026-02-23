@@ -16,8 +16,6 @@ The system follows a decoupled, N-tier architecture to ensure clear separation o
 * **Database (PostgreSQL):** Serves as the immutable source of truth for transaction states and user audit trails.
 * **External Integration:** Utilizes Pesapal Sandbox for payment simulation and **Ngrok** for handling asynchronous IPN (Instant Payment Notification) callbacks in a local development environment.
 
-
-
 ## 3. Core Features & Implementation Details
 
 ### A. Secure Payment Flow (PCI DSS Alignment)
@@ -26,14 +24,9 @@ To ensure sensitive card data never touches our infrastructure, the following me
 * **Tokenization:** The mobile client receives a non-sensitive payment token/tracking ID. The backend uses this ID to query status, ensuring the "scope of impact" is limited in case of a breach.
 
 ### B. Transaction Resilience
-* **Idempotency Keys:** Every transaction initiation generates a unique `idempotency_key`. This prevents double-charging if a user accidentally taps the "Pay" button twice or if the network retries a request.
 * **Status Polling:** The app implements a background polling mechanism to check the backend status, ensuring the UI stays synchronized with the database regardless of callback delays.
 
-### C. Offline Capability & Local Storage
-* **Room Persistence:** Past transactions are cached in a local **Room Database**. Users can view their transaction history without an active internet connection.
-* **Encrypted Preferences:** Sensitive identifiers, such as Auth Tokens and API keys, are stored using **EncryptedSharedPreferences** via the Android Keystore.
-
-### D. Document Generation
+### C. Document Generation
 * Successful transactions trigger a PDF receipt generator using the `PdfDocument` API, providing users with immediate, downloadable proof of payment.
 
 ## 4. Database Schema

@@ -98,9 +98,9 @@ def setup_ipn(ngrok_url: str):
 @app.post("/api/v1/payments/initiate", response_model=schemas.PaymentResponse)
 def initiate_payment(payload: schemas.PaymentCreate, db: Session = Depends(get_db)):
     """
-    1. Saves the pending transaction to your database.
-    2. Calls Pesapal V3 to get a real payment link.
-    3. Updates the DB with the Pesapal Tracking ID.
+    1. Save pending transaction to your database.
+    2. Call Pesapal V3 to get a real payment link.
+    3. Update the DB with the Pesapal Tracking ID.
     """
 
     merchant_ref = str(uuid.uuid4())[:12]
@@ -161,7 +161,6 @@ def payment_callback(
             "payment_status_description"
         )  # e.g., "Completed"
 
-        # Update your database
         transaction = (
             db.query(models.Transaction)
             .filter(models.Transaction.transaction_ref == OrderMerchantReference)

@@ -64,10 +64,3 @@ The PostgreSQL database utilizes a `transactions` table with the following criti
 1. Open the project in Android Studio.
 2. Update the `BASE_URL` in the Retrofit client with your active Ngrok address.
 3. Sync Gradle and run the app.
-
-## 7. Quality Assurance (QA)
-* **Unit Testing:** Logic for amount validation is tested via **JUnit**.
-* **Integration Testing:** Payment flow from Mobile -> Backend -> Database verified using **Postman**.
-* **Failure Scenarios Tested:** * Network timeout during processing.
-    * Declined card responses.
-    * Simulated gateway downtime (503 errors).
